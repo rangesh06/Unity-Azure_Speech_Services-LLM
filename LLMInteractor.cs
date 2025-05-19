@@ -11,7 +11,7 @@ using LLMUnity;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(AudioSource))]
-public class ClariaAgent : MonoBehaviour
+public class LLMInteractor : MonoBehaviour
 {
     [Header("UI References")]
     public Button speakButton;
@@ -162,11 +162,11 @@ public class ClariaAgent : MonoBehaviour
         // Make sure SpeechHandler is properly initialized
         if (speechHandler != null)
         {
-            Debug.Log("ClariaAgent: SpeechHandler reference found");
+            Debug.Log("LLMInteractor: SpeechHandler reference found");
         }
         else
         {
-            Debug.LogWarning("ClariaAgent: No SpeechHandler reference found");
+            Debug.LogWarning("LLMInteractor: No SpeechHandler reference found");
         }
         
         // Initialize cancellation token source
@@ -175,23 +175,23 @@ public class ClariaAgent : MonoBehaviour
     
     private async void Start()
     {
-        Debug.Log("ClariaAgent: Starting initialization");
+        Debug.Log("LLMInteractor: Starting initialization");
         
         if (llmCharacter == null)
         {
-            Debug.LogError("ClariaAgent: LLMCharacter is not assigned!");
+            Debug.LogError("LLMInteractor: LLMCharacter is not assigned!");
             return;
         }
         
         // Validate critical components
         if (speechToText == null)
         {
-            Debug.LogError("ClariaAgent: SpeechToTextService is not assigned!");
+            Debug.LogError("LLMInteractor: SpeechToTextService is not assigned!");
         }
         
         if (textToSpeech == null)
         {
-            Debug.LogError("ClariaAgent: TextToSpeechService is not assigned!");
+            Debug.LogError("LLMInteractor: TextToSpeechService is not assigned!");
         }
         
         if (responseText != null)
@@ -201,7 +201,7 @@ public class ClariaAgent : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("ClariaAgent: responseText is not assigned!");
+            Debug.LogWarning("LLMInteractor: responseText is not assigned!");
         }
         
         if (statusText != null)
@@ -210,7 +210,7 @@ public class ClariaAgent : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("ClariaAgent: statusText is not assigned!");
+            Debug.LogWarning("LLMInteractor: statusText is not assigned!");
         }
         
         if (speakButton != null)
@@ -219,11 +219,11 @@ public class ClariaAgent : MonoBehaviour
             speakButton.onClick.RemoveAllListeners();
             speakButton.onClick.AddListener(OnSpeakButtonClicked);
             speakButton.interactable = false;
-            Debug.Log("ClariaAgent: Speak button initialized and onClick listener added");
+            Debug.Log("LLMInteractor: Speak button initialized and onClick listener added");
         }
         else
         {
-            Debug.LogError("ClariaAgent: Speak button is not assigned!");
+            Debug.LogError("LLMInteractor: Speak button is not assigned!");
         }
         
         // Initialize the LLM first
@@ -236,21 +236,21 @@ public class ClariaAgent : MonoBehaviour
         // Start microphone access check in the background
         Task micCheckTask = Task.Run(async () => {
             try {
-                Debug.Log("ClariaAgent: Starting microphone access check");
+                Debug.Log("LLMInteractor: Starting microphone access check");
                 await Task.Delay(500); // Let other initialization happen first
                 
                 // Do the actual check
                 bool micAvailable = await CheckMicrophoneAccessAsync();
                 
                 if (!micAvailable) {
-                    Debug.LogWarning("ClariaAgent: Microphone not detected during startup check");
+                    Debug.LogWarning("LLMInteractor: Microphone not detected during startup check");
                 }
                 else {
-                    Debug.Log("ClariaAgent: Microphone access check successful");
+                    Debug.Log("LLMInteractor: Microphone access check successful");
                 }
             }
             catch (Exception ex) {
-                Debug.LogWarning($"ClariaAgent: Error during startup mic check: {ex.Message}");
+                Debug.LogWarning($"LLMInteractor: Error during startup mic check: {ex.Message}");
             }
         });
         
@@ -261,13 +261,13 @@ public class ClariaAgent : MonoBehaviour
     {
         if (!preWarmSpeechServices)
         {
-            Debug.Log("ClariaAgent: Speech pre-warming is disabled, skipping");
+            Debug.Log("LLMInteractor: Speech pre-warming is disabled, skipping");
             return;
         }
         
         try
         {
-            Debug.Log("ClariaAgent: Starting comprehensive pre-warm process for speech services");
+            Debug.Log("LLMInteractor: Starting comprehensive pre-warm process for speech services");
             
             // Create a list of tasks that can run in parallel
             List<Task> preWarmTasks = new List<Task>();
@@ -277,13 +277,13 @@ public class ClariaAgent : MonoBehaviour
             {
                 var ttsTask = Task.Run(async () => {
                     try {
-                        Debug.Log("ClariaAgent: Pre-warming TTS service in background");
+                        Debug.Log("LLMInteractor: Pre-warming TTS service in background");
                         // Synthesize a simple greeting to warm up the TTS engine
                         await textToSpeech.SynthesizeSpeechAsync("Hello");
-                        Debug.Log("ClariaAgent: TTS service pre-warming completed");
+                        Debug.Log("LLMInteractor: TTS service pre-warming completed");
                     }
                     catch (Exception ex) {
-                        Debug.LogWarning($"ClariaAgent: Error during TTS pre-warming: {ex.Message}");
+                        Debug.LogWarning($"LLMInteractor: Error during TTS pre-warming: {ex.Message}");
                     }
                 });
                 
@@ -296,7 +296,7 @@ public class ClariaAgent : MonoBehaviour
                 var sttTask = Task.Run(async () => {
                     try {
                         // First, ensure the InitializeSpeechConfig method runs
-                        Debug.Log("ClariaAgent: Starting STT config pre-initialization");
+                        Debug.Log("LLMInteractor: Starting STT config pre-initialization");
                         
                         // Call this method which will initialize the speech config in advance
                         // This is a non-blocking operation that prepares Azure Speech SDK
@@ -308,7 +308,7 @@ public class ClariaAgent : MonoBehaviour
                                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                                 if (initMethod != null)
                                 {
-                                    Debug.Log("ClariaAgent: Pre-initializing speech config via reflection");
+                                    Debug.Log("LLMInteractor: Pre-initializing speech config via reflection");
                                     initMethod.Invoke(speechToText, null);
                                 }
                                 initTcs.SetResult(true);
@@ -332,7 +332,7 @@ public class ClariaAgent : MonoBehaviour
                             try {
                                 if (speechToText.GetType().GetMethod("ForceResetRecognizer") != null)
                                 {
-                                    Debug.Log("ClariaAgent: Pre-initializing STT recognizer");
+                                    Debug.Log("LLMInteractor: Pre-initializing STT recognizer");
                                     speechToText.ForceResetRecognizer();
                                 }
                                 resetTcs.SetResult(true);
@@ -351,10 +351,10 @@ public class ClariaAgent : MonoBehaviour
                         
                         // Mark speech to text as initialized to avoid additional initialization on first click
                         isSpeechToTextInitialized = true;
-                        Debug.Log("ClariaAgent: STT service thoroughly pre-warmed");
+                        Debug.Log("LLMInteractor: STT service thoroughly pre-warmed");
                     }
                     catch (Exception ex) {
-                        Debug.LogWarning($"ClariaAgent: Error during STT pre-warming: {ex.Message}");
+                        Debug.LogWarning($"LLMInteractor: Error during STT pre-warming: {ex.Message}");
                     }
                 });
                 
@@ -368,16 +368,16 @@ public class ClariaAgent : MonoBehaviour
             
             if (await Task.WhenAny(timeoutTask, Task.WhenAll(preWarmTasks)) == timeoutTask)
             {
-                Debug.LogWarning("ClariaAgent: Pre-warming timed out, but proceeding anyway");
+                Debug.LogWarning("LLMInteractor: Pre-warming timed out, but proceeding anyway");
             }
             else
             {
-                Debug.Log("ClariaAgent: Speech services pre-warming process completed successfully");
+                Debug.Log("LLMInteractor: Speech services pre-warming process completed successfully");
             }
         }
         catch (Exception ex)
         {
-            Debug.LogWarning($"ClariaAgent: Error during speech services pre-warming: {ex.Message}");
+            Debug.LogWarning($"LLMInteractor: Error during speech services pre-warming: {ex.Message}");
         }
     }
     
@@ -503,7 +503,7 @@ public class ClariaAgent : MonoBehaviour
             cts.Cancel();
             
             // Log the error
-            Debug.LogError($"ClariaAgent: Error initializing LLM: {ex.Message}");
+            Debug.LogError($"LLMInteractor: Error initializing LLM: {ex.Message}");
             
             // Update UI on the main thread
             MainThreadDispatcher.ExecuteOnMainThread(() => {
@@ -576,7 +576,7 @@ public class ClariaAgent : MonoBehaviour
         // Check if speech to text service is available
         if (speechToText == null)
         {
-            Debug.LogError("ClariaAgent: SpeechToTextService is not assigned");
+            Debug.LogError("LLMInteractor: SpeechToTextService is not assigned");
             isProcessing = false;
             UpdateUIState(false);
             return;
@@ -592,7 +592,7 @@ public class ClariaAgent : MonoBehaviour
             
             if (!micAccessGranted)
             {
-                Debug.LogError("ClariaAgent: Microphone access failed - please check device permissions");
+                Debug.LogError("LLMInteractor: Microphone access failed - please check device permissions");
                 
                 if (responseText != null)
                 {
@@ -645,7 +645,7 @@ public class ClariaAgent : MonoBehaviour
                     await Task.Delay(50);
                 }
                 catch (Exception ex) {
-                    Debug.LogWarning($"ClariaAgent: First-time speech init error: {ex.Message}");
+                    Debug.LogWarning($"LLMInteractor: First-time speech init error: {ex.Message}");
                 }
             });
             
@@ -815,7 +815,7 @@ public class ClariaAgent : MonoBehaviour
                             }
                             catch (Exception ex)
                             {
-                                Debug.LogError($"ClariaAgent: Error processing response: {ex.Message}");
+                                Debug.LogError($"LLMInteractor: Error processing response: {ex.Message}");
                                 if (responseText != null)
                                 {
                                     responseText.text = "Sorry, there was an error processing your request.";
@@ -840,7 +840,7 @@ public class ClariaAgent : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Debug.LogError($"ClariaAgent: Error during speech recognition: {ex.Message}");
+            Debug.LogError($"LLMInteractor: Error during speech recognition: {ex.Message}");
             
             // Update UI on main thread
             MainThreadDispatcher.ExecuteOnMainThread(() => {
@@ -910,7 +910,7 @@ public class ClariaAgent : MonoBehaviour
             // Force reset the speech recognizer to ensure it's in a clean state
             if (speechToText.GetType().GetMethod("ForceResetRecognizer") != null)
             {
-                Debug.Log("ClariaAgent: Forcing reset of speech recognizer");
+                Debug.Log("LLMInteractor: Forcing reset of speech recognizer");
                 speechToText.ForceResetRecognizer();
             }
         }
@@ -936,7 +936,7 @@ public class ClariaAgent : MonoBehaviour
         {
             if (lowerInput.Contains(keyword))
             {
-                Debug.Log($"ClariaAgent: Voice control keyword detected: '{keyword}'");
+                Debug.Log($"LLMInteractor: Voice control keyword detected: '{keyword}'");
                 return true;
             }
         }
@@ -947,7 +947,7 @@ public class ClariaAgent : MonoBehaviour
     // Test method to manually trigger voice commands (for debugging)
     public void TestVoiceCommand(string command)
     {
-        Debug.Log($"ClariaAgent: Testing voice command: '{command}'");
+        Debug.Log($"LLMInteractor: Testing voice command: '{command}'");
         
         if (speechHandler != null)
         {
@@ -955,7 +955,7 @@ public class ClariaAgent : MonoBehaviour
         }
         else
         {
-            Debug.LogError("ClariaAgent: Cannot test voice command - speechHandler is null");
+            Debug.LogError("LLMInteractor: Cannot test voice command - speechHandler is null");
         }
     }
     
@@ -1060,7 +1060,7 @@ public class ClariaAgent : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Debug.LogError($"ClariaAgent: Error in ProcessLLMResponse: {ex.Message}");
+            Debug.LogError($"LLMInteractor: Error in ProcessLLMResponse: {ex.Message}");
             MainThreadDispatcher.ExecuteOnMainThread(() => {
                 if (responseText != null)
                 {
@@ -1101,7 +1101,7 @@ public class ClariaAgent : MonoBehaviour
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"ClariaAgent: Error speaking text: {ex.Message}");
+                    Debug.LogError($"LLMInteractor: Error speaking text: {ex.Message}");
                     // Fall back to direct TextToSpeech
                     await FallbackSpeechSynthesis(textToSpeak);
                 }
@@ -1113,7 +1113,7 @@ public class ClariaAgent : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Debug.LogError($"ClariaAgent: Error speaking text: {ex.Message}");
+            Debug.LogError($"LLMInteractor: Error speaking text: {ex.Message}");
         }
         
         isSpeaking = false;
@@ -1128,7 +1128,7 @@ public class ClariaAgent : MonoBehaviour
             
             if (audioClip == null)
             {
-                Debug.LogWarning("ClariaAgent: Failed to synthesize speech");
+                Debug.LogWarning("LLMInteractor: Failed to synthesize speech");
                 return;
             }
             
@@ -1179,7 +1179,7 @@ public class ClariaAgent : MonoBehaviour
             }
             catch (Exception ex)
             {
-                Debug.LogError($"ClariaAgent: Error stopping speech: {ex.Message}");
+                Debug.LogError($"LLMInteractor: Error stopping speech: {ex.Message}");
             }
             isSpeaking = false;
             return;
@@ -1211,7 +1211,7 @@ public class ClariaAgent : MonoBehaviour
             }
             catch (Exception ex)
             {
-                Debug.LogError($"ClariaAgent: Error pausing speech: {ex.Message}");
+                Debug.LogError($"LLMInteractor: Error pausing speech: {ex.Message}");
             }
             return;
         }
@@ -1240,7 +1240,7 @@ public class ClariaAgent : MonoBehaviour
             }
             catch (Exception ex)
             {
-                Debug.LogError($"ClariaAgent: Error resuming speech: {ex.Message}");
+                Debug.LogError($"LLMInteractor: Error resuming speech: {ex.Message}");
             }
             return;
         }
