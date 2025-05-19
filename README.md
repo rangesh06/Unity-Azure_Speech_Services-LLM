@@ -258,4 +258,4 @@ Found a bug or have an idea for an improvement? Feel free to open an issue or su
 
 ## 📜 License
 
-Consider adding a license file to your project (e.g., MIT, Apache 2.0). If not specified, it defaults to standard copyright laws. Example:
+The license of LLM for Unity is MIT (LICENSE.md) and uses third-party software with MIT and Apache licenses. Some models included in the asset define their own license terms, please review them before using each model.
