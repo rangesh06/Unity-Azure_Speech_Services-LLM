@@ -1,5 +1,5 @@
 # Unity---Azure-Speech-Services
-Speech services scripts for STT, TTS and Speech handler.
+Speech services scripts for LLM interactor, STT, TTS and Speech handler.
 # Voice-Enabled LLM Interaction System for Unity
 
 [![Unity Version](https://img.shields.io/badge/Unity-2022.3%2B-blue.svg)](https://unity.com/)
